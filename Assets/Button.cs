@@ -5,7 +5,7 @@ public class Button : MonoBehaviour
 {
     public Transform door;
     public float doorOpenSpeed = 2f; // Kecepatan membuka pintu
-    public Vector3 openOffset = new Vector3(0, 0, -12); // Pergeseran posisi pintu
+    private Vector3 openOffset = new Vector3(0, 0, -45); // Pergeseran posisi pintu
     private Vector3 targetDoorPosition;
     bool doorOpen = false;
 

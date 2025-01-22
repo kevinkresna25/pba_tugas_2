@@ -7,6 +7,7 @@ public class Boss : MonoBehaviour
     public GameObject particleEffectPrefab;
     public AudioClip hitSound;
     public AudioClip deathSound;
+    public ParticleSystem effectPrefab; // Mengambil partikel sistem
     private Rigidbody rb;
     private AudioSource audio;
     private int health = 5; // nyawa boss
@@ -30,23 +31,45 @@ public class Boss : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (bossMoving && Vector3.Distance(gameObject.transform.position, player.transform.position) <= 7.0f) //7.0f
+        if (bossMoving)
         {
-            Debug.Log("Dekat"); // untuk debug
+            if (Vector3.Distance(gameObject.transform.position, player.transform.position) <= 1000.0f)
+            {
+                gameObject.transform.LookAt(player.transform);
+                rb.transform.Translate(Vector3.forward * Time.deltaTime * speed);
 
-            gameObject.transform.LookAt(player.transform); // Boss bergerak ke player
-            rb.transform.Translate(Vector3.forward * Time.deltaTime * speed);
+                // Panggil efek partikel saat bos bergerak
+                TampilkanEffect();
+
+                // Perbarui posisi efek partikel mengikuti posisi bos
+                effectPrefab.transform.position = transform.position;
+            }
+        }
+        else
+        {
+            // Hentikan efek jika bos tidak bergerak
+            if (effectPrefab.isPlaying)
+            {
+                effectPrefab.Stop();
+            }
         }
 
         if (health <= 0)
         {
-            Debug.Log("Bos hapus");
             if (!onePlay)
             {
-                audio.PlayOneShot(deathSound); // Mainkan suara
-                onePlay = true; // Tandai bahwa suara sudah diputar
+                audio.PlayOneShot(deathSound);
+                onePlay = true;
             }
             BossDeath();
+        }
+    }
+
+    private void TampilkanEffect()
+    {
+        if (!effectPrefab.isPlaying) // Cek jika efek belum berjalan
+        {
+            effectPrefab.Play(); // Mainkan efek
         }
     }
 
@@ -57,7 +80,6 @@ public class Boss : MonoBehaviour
             // Instansiasi efek partikel di lokasi bos
             Instantiate(particleEffectPrefab, transform.position, Quaternion.identity);
             particleCount++;
-
         }
         Destroy(gameObject, 8f); // Hancurkan bos
     }
@@ -76,6 +98,7 @@ public class Boss : MonoBehaviour
             Destroy(other.gameObject); // peluru langsung hilang
             //GetComponent<AudioSource>().PlayOneShot(hitSound); // suara bos terkena peluru
             audio.PlayOneShot(hitSound);
+            Debug.Log("Bos " + health);
 
             if (health <= 0)
             {
